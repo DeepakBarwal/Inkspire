@@ -4,19 +4,18 @@
   "description": "",
   "main": "index.js",
   "exports": {
-    "./types": "./src/types.ts"
+    "./types": "./dist/types.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -b"
   },
-  "devDependencies": {
-    "@repo/typescript-config": "workspace:*"
-  },
+  "devDependencies": {},
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "zod": "^4.0.17"
+    "zod": "^4.0.17",
+    "@repo/typescript-config": "workspace:*"
   }
 }

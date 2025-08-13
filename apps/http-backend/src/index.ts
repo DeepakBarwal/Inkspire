@@ -7,6 +7,7 @@ import {
   SignInSchema,
   CreateRoomSchema,
 } from "@repo/common/types";
+// import { prismaClient } from "@repo/db/client";
 
 const app = express();
 
@@ -17,7 +18,11 @@ app.post("/signup", (req, res) => {
       message: "Incorrect inputs",
     });
   }
-  // db call
+
+  // prismaClient.user.create({
+
+  // })
+
   res.json({
     userId: 123,
   });

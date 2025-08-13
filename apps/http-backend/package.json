@@ -11,9 +11,7 @@
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
     "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@repo/backend-common": "workspace:*",
-    "@repo/common": "workspace:*"
+    "@types/jsonwebtoken": "^9.0.10"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +19,9 @@
   "type": "commonjs",
   "dependencies": {
     "express": "^5.1.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "@repo/backend-common": "workspace:*",
+    "@repo/common": "workspace:*",
+    "@repo/db": "workspace:*"
   }
 }
