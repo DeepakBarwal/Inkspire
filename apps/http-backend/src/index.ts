@@ -98,4 +98,34 @@ app.post("/room", middleware, async (req: AuthRequest, res) => {
   }
 });
 
+app.get("/chats/:roomId", async (req, res) => {
+  const roomId = Number(req.params.roomId);
+
+  if (Number.isNaN(roomId)) {
+    return res.status(404).json({
+      message: "Not found",
+    });
+  }
+
+  try {
+    const messages = await prismaClient.chat.findMany({
+      where: {
+        roomId: roomId,
+      },
+      orderBy: {
+        id: "desc",
+      },
+      take: 50,
+    });
+
+    res.json({
+      messages,
+    });
+  } catch (error) {
+    res.status(411).json({
+      message: "Something went wrong",
+    });
+  }
+});
+
 app.listen(3001);
