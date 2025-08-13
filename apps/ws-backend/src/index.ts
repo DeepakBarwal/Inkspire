@@ -1,6 +1,7 @@
 import { WebSocketServer, WebSocket } from "ws";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
+import { prismaClient } from "@repo/db/client";
 
 const wss = new WebSocketServer({ port: 8080 });
 
@@ -22,6 +23,7 @@ function checkUser(token: string): string | null {
 
     return (decoded as JwtPayload).userId;
   } catch (error) {
+    console.error("Something went wrong");
     return null;
   }
 }
@@ -46,7 +48,7 @@ wss.on("connection", function connection(ws, request) {
     ws,
   });
 
-  ws.on("message", function message(data) {
+  ws.on("message", async function message(data) {
     try {
       const parsedData = JSON.parse(data as unknown as string); // {type: "join-room", roomId: 1}
 
@@ -74,6 +76,15 @@ wss.on("connection", function connection(ws, request) {
         const roomId = parsedData?.roomId;
         const message = parsedData?.message;
 
+        // Bad approach. Push it to a queue instead
+        await prismaClient.chat.create({
+          data: {
+            roomId,
+            message,
+            userId,
+          },
+        });
+
         users.forEach((user) => {
           if (user.rooms.includes(roomId)) {
             user.ws.send(
@@ -87,6 +98,7 @@ wss.on("connection", function connection(ws, request) {
         });
       }
     } catch (error) {
+      console.error("Something went wrong");
       return;
     }
   });
