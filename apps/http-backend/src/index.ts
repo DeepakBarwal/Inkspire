@@ -128,4 +128,24 @@ app.get("/chats/:roomId", async (req, res) => {
   }
 });
 
+app.get("/room/:slug", async (req, res) => {
+  const slug = req.params.slug;
+
+  try {
+    const room = await prismaClient.room.findFirst({
+      where: {
+        slug: slug,
+      },
+    });
+
+    res.json({
+      room,
+    });
+  } catch (error) {
+    res.status(411).json({
+      message: "Something went wrong",
+    });
+  }
+});
+
 app.listen(3001);
