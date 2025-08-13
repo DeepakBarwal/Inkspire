@@ -2,8 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { JWT_SECRET } from "@repo/backend-common/config";
 
-interface AuthRequest extends Request {
-  userId?: number;
+export interface AuthRequest extends Request {
+  userId?: string;
 }
 
 export function middleware(
