@@ -1,3 +1,5 @@
+// ugly logic: deprecated - refer Game.ts
+
 import { HTTP_BACKEND } from "@/config";
 import axios from "axios";
 
@@ -14,6 +16,13 @@ type Shape =
       centerX: number;
       centerY: number;
       radius: number;
+    }
+  | {
+      type: "pencil";
+      startX: number;
+      startY: number;
+      endX: number;
+      endY: number;
     };
 
 export async function initDraw(
@@ -55,13 +64,34 @@ export async function initDraw(
     clicked = false;
     const width = e.clientX - startX;
     const height = e.clientY - startY;
-    const shape: Shape = {
-      type: "rect",
-      x: startX,
-      y: startY,
-      height,
-      width,
-    };
+
+    let shape: Shape | null = null;
+
+    // @ts-expect-error bad way
+    if (window.selectedTool === "rect") {
+      shape = {
+        // @ts-expect-error bad way
+        type: window.selectedTool,
+        x: startX,
+        y: startY,
+        height,
+        width,
+      };
+
+      // @ts-expect-error bad way
+    } else if (window.selectedTool === "circle") {
+      const radius = Math.max(width, height) / 2;
+      shape = {
+        // @ts-expect-error bad way
+        type: window.selectedTool,
+        radius,
+        centerX: startX + radius,
+        centerY: startY + radius,
+      };
+    }
+
+    if (!shape) return;
+
     existingShapes.push(shape);
 
     socket.send(
@@ -79,7 +109,19 @@ export async function initDraw(
       const height = e.clientY - startY;
       clearCanvas(existingShapes, canvas, ctx);
       ctx.strokeStyle = "rgba(255, 255, 255, 1)";
-      ctx.strokeRect(startX, startY, width, height);
+      // @ts-expect-error bad way
+      const selectedTool = window.selectedTool;
+      if (selectedTool === "rect") {
+        ctx.strokeRect(startX, startY, width, height);
+      } else if (selectedTool === "circle") {
+        const radius = Math.max(width, height) / 2;
+        const centerX = startX + radius;
+        const centerY = startY + radius;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.closePath();
+      }
     }
   });
 }
@@ -97,6 +139,11 @@ function clearCanvas(
     if (shape.type === "rect") {
       ctx.strokeStyle = "rgba(255, 255, 255, 1)";
       ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
+    } else if (shape.type === "circle") {
+      ctx.beginPath();
+      ctx.arc(shape.centerX, shape.centerY, shape.radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.closePath();
     }
   });
 }
