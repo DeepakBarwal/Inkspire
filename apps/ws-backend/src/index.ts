@@ -23,7 +23,7 @@ function checkUser(token: string): string | null {
 
     return (decoded as JwtPayload).userId;
   } catch (error) {
-    console.error("Something went wrong");
+    console.error("Something went wrong", error);
     return null;
   }
 }
@@ -49,8 +49,10 @@ wss.on("connection", function connection(ws, request) {
   });
 
   ws.on("message", async function message(data) {
+    let parsedData: any;
     try {
-      const parsedData = JSON.parse(data as unknown as string); // {type: "join-room", roomId: 1}
+      parsedData = JSON.parse(data as unknown as string); // {type: "join-room", roomId: 1}
+      console.log(parsedData);
 
       if (parsedData.type === "join_room" && parsedData?.roomId) {
         const user = users.find((x) => x.ws === ws);
@@ -79,7 +81,7 @@ wss.on("connection", function connection(ws, request) {
         // Bad approach. Push it to a queue instead
         await prismaClient.chat.create({
           data: {
-            roomId,
+            roomId: Number(roomId),
             message,
             userId,
           },
@@ -98,7 +100,7 @@ wss.on("connection", function connection(ws, request) {
         });
       }
     } catch (error) {
-      console.error("Something went wrong");
+      console.error("Something went wrong", error);
       return;
     }
   });
