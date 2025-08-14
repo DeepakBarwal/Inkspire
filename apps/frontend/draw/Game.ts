@@ -17,11 +17,15 @@ type Shape =
     }
   | {
       type: "pencil";
-      startX: number;
-      startY: number;
-      endX: number;
-      endY: number;
+      points: { x: number; y: number }[];
     };
+// | {
+//     type: "pencil";
+//     startX: number;
+//     startY: number;
+//     endX: number;
+//     endY: number;
+//   };
 
 export class Game {
   private canvas: HTMLCanvasElement;
@@ -33,6 +37,7 @@ export class Game {
   private startX = 0;
   private startY = 0;
   private selectedTool = "rect";
+  private currentPencilPoints: { x: number; y: number }[] = [];
 
   constructor(canvas: HTMLCanvasElement, roomId: string, socket: WebSocket) {
     this.canvas = canvas;
@@ -95,14 +100,27 @@ export class Game {
         );
         this.ctx.stroke();
         this.ctx.closePath();
+      } else if (shape.type === "pencil") {
+        if (shape.points.length > 1) {
+          this.ctx.beginPath();
+          this.ctx.moveTo(shape.points[0].x, shape.points[0].y);
+          for (let i = 0; i < shape.points.length; i++) {
+            this.ctx.lineTo(shape.points[i].x, shape.points[i].y);
+          }
+          this.ctx.stroke();
+        }
       }
     });
   }
 
   mouseDownHandler = (e: MouseEvent) => {
     this.clicked = true;
-    this.startX = e.clientX;
-    this.startY = e.clientY;
+    if (this.selectedTool === "pencil") {
+      this.currentPencilPoints = [{ x: e.clientX, y: e.clientY }];
+    } else {
+      this.startX = e.clientX;
+      this.startY = e.clientY;
+    }
   };
 
   mouseUpHandler = (e: MouseEvent) => {
@@ -111,7 +129,6 @@ export class Game {
     const height = e.clientY - this.startY;
 
     let shape: Shape | null = null;
-    console.log(this.selectedTool);
 
     if (this.selectedTool === "rect") {
       shape = {
@@ -129,6 +146,12 @@ export class Game {
         centerX: this.startX + radius,
         centerY: this.startY + radius,
       };
+    } else if (this.selectedTool === "pencil") {
+      shape = {
+        type: "pencil",
+        points: [...this.currentPencilPoints],
+      };
+      this.currentPencilPoints = [];
     }
 
     if (!shape) return;
@@ -145,7 +168,21 @@ export class Game {
   };
 
   mouseMoveHandler = (e: MouseEvent) => {
-    if (this.clicked) {
+    if (this.clicked && this.selectedTool === "pencil") {
+      this.currentPencilPoints.push({ x: e.clientX, y: e.clientY });
+
+      this.clearCanvas();
+      this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
+
+      this.ctx.beginPath();
+      for (let i = 0; i < this.currentPencilPoints.length - 1; i++) {
+        const p1 = this.currentPencilPoints[i];
+        const p2 = this.currentPencilPoints[i + 1];
+        this.ctx.moveTo(p1.x, p1.y);
+        this.ctx.lineTo(p2.x, p2.y);
+      }
+      this.ctx.stroke();
+    } else if (this.clicked) {
       const width = e.clientX - this.startX;
       const height = e.clientY - this.startY;
       this.clearCanvas();
