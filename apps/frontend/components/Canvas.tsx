@@ -55,6 +55,12 @@ export function Canvas({
         ref={canvasRef}
         width={window.innerWidth}
         height={window.innerHeight}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          backgroundColor: "black", // match your Game bg
+        }}
       ></canvas>
 
       <TopBar selectedTool={selectedTool} setSelectedTool={setSelectedTool} />
