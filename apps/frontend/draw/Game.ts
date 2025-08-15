@@ -84,10 +84,10 @@ export class Game {
     this.ctx.clearRect(0, 0, this.canvas?.width, this.canvas?.height);
     this.ctx.fillStyle = "rgba(0, 0, 0, 1)";
     this.ctx.fillRect(0, 0, this.canvas?.width, this.canvas?.height);
+    this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
 
     this.existingShapes.map((shape) => {
       if (shape.type === "rect") {
-        this.ctx.strokeStyle = "rgba(255, 255, 255, 1)";
         this.ctx.strokeRect(shape.x, shape.y, shape.width, shape.height);
       } else if (shape.type === "circle") {
         this.ctx.beginPath();
